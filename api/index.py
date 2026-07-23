@@ -240,7 +240,8 @@ def download_media(url: str):
             response_data["music_info"] = {
                 "title": music.get('title', ''),
                 "artist": music.get('display_artist', ''),
-                "is_original": music.get('is_original_sound', False)
+                "is_original": music.get('is_original_sound', False),
+                "audio_url": str(music.get("progressive_download_url", "")) if music.get("progressive_download_url") else None
             }
         
         # Download Links

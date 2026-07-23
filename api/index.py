@@ -34,7 +34,6 @@ def get_client(telegram_id: str = None):
 def home():
     return {
         "status": "Running 🚀",
-        "message": "Welcome to Bhaigram Backend API",
         "endpoints": {
             "health_check": "/health",
             "download_media": "/download/media?url=...",
@@ -47,7 +46,13 @@ def home():
             "search_users": "/search/users?query=...",
             "search_hashtag": "/search/hashtag?name=...&amount=10",
             "user_feed": "/feed/{telegram_id}",
-            "user_saved": "/saved/{telegram_id}"
+            "user_saved_get": "/saved/{telegram_id}",
+            "user_saved_add": "/saved/{telegram_id}/{reel_id}",
+            "like_reel": "/like/{media_id}",
+            "not_interested": "/not_interested/{media_id}",
+            "reel_info": "/reel/{reel_id}/info",
+            "reel_comments": "/reel/{reel_id}/comments",
+            "add_comment": "/reel/{reel_id}/comment/{telegram_id}"
         }
     }
 

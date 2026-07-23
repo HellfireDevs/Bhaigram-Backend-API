@@ -83,11 +83,8 @@ def home():
             "user_feed": "/feed/{telegram_id}",
             "user_saved_get": "/saved/{telegram_id}",
             "user_saved_add": "/saved/{telegram_id}/{reel_id}",
-            "like_reel": "/like/{media_id}",
-            "not_interested": "/not_interested/{media_id}",
             "reel_info": "/reel/{reel_id}/info",
-            "reel_comments": "/reel/{reel_id}/comments",
-            "add_comment": "/reel/{reel_id}/comment/{telegram_id}"
+            "reel_comments": "/reel/{reel_id}/comments"
         }
     }
 
@@ -154,30 +151,7 @@ def get_reels_feed(telegram_id: str, limit: int = 5):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/like/{media_id}")
-async def like_reel(media_id: str, request: Request):
-    try:
-        data = await request.json()
-        telegram_id = data.get("telegram_id")
-        cl = get_client(telegram_id)
-        cl.media_like(media_id)
-        return {"success": True, "message": "Reel liked on Instagram!"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/not_interested/{media_id}")
-async def not_interested_reel(media_id: str, request: Request):
-    try:
-        data = await request.json()
-        telegram_id = data.get("telegram_id")
-        cl = get_client(telegram_id)
-        try:
-            cl.private_request(f"discover/explore_report/", data={"explore_source_token": "", "media_id": media_id})
-        except:
-            pass
-        return {"success": True, "message": "Instagram will show fewer reels like this."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # ================= NEW ENDPOINTS (MongoDB + IG Info) =================
 
@@ -196,22 +170,7 @@ def get_reel_info(reel_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/reel/{reel_id}/comment/{telegram_id}")
-async def add_comment(reel_id: str, telegram_id: str, request: Request):
-    try:
-        data = await request.json()
-        text = data.get("text", "")
-        
-        comment = {
-            "reel_id": reel_id,
-            "telegram_id": telegram_id,
-            "text": text,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        comments_col.insert_one(comment)
-        return {"success": True, "message": "Comment added to MongoDB!"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/reel/{reel_id}/comments")
 def get_comments(reel_id: str):

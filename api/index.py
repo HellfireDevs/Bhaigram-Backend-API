@@ -309,6 +309,25 @@ def profile_info(query: str):
             "profile_pic_url_hd": str(user_info.profile_pic_url_hd)
         }
         
+        # Fetch stories silently to attach to profile info
+        try:
+            stories = cl.user_stories(user_info.pk)
+            active_stories = []
+            for s in stories:
+                active_stories.append({
+                    "pk": s.pk,
+                    "taken_at": s.taken_at.isoformat() if s.taken_at else None,
+                    "media_type": s.media_type,
+                    "video_url": str(s.video_url) if s.video_url else None,
+                    "thumbnail_url": str(s.thumbnail_url) if s.thumbnail_url else None,
+                    "image_url": str(s.thumbnail_url) if s.media_type == 1 else None
+                })
+            response_data["has_active_story"] = len(active_stories) > 0
+            response_data["active_stories"] = active_stories
+        except Exception:
+            response_data["has_active_story"] = False
+            response_data["active_stories"] = []
+
         return {"success": True, "data": response_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

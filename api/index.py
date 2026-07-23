@@ -30,6 +30,27 @@ def get_client(telegram_id: str = None):
     else:
         raise HTTPException(status_code=401, detail="IG_SESSION_ID not found in environment variables")
 
+@app.get("/")
+def home():
+    return {
+        "status": "Running 🚀",
+        "message": "Welcome to Bhaigram Backend API",
+        "endpoints": {
+            "health_check": "/health",
+            "download_media": "/download/media?url=...",
+            "profile_info": "/profile/info?query=username_or_url",
+            "profile_stories": "/profile/stories?username=...",
+            "profile_highlights": "/profile/highlights?username=...",
+            "profile_posts": "/profile/posts?username=...&amount=12",
+            "profile_followers": "/profile/followers?username=...&amount=20",
+            "profile_following": "/profile/following?username=...&amount=20",
+            "search_users": "/search/users?query=...",
+            "search_hashtag": "/search/hashtag?name=...&amount=10",
+            "user_feed": "/feed/{telegram_id}",
+            "user_saved": "/saved/{telegram_id}"
+        }
+    }
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "message": "Bhaigram backend is running perfectly!"}

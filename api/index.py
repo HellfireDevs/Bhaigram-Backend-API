@@ -292,5 +292,136 @@ def profile_info(query: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/profile/stories")
+def get_user_stories(username: str):
+    try:
+        user_id = cl.user_id_from_username(username)
+        stories = cl.user_stories(user_id)
+        data = []
+        for s in stories:
+            data.append({
+                "pk": s.pk,
+                "taken_at": s.taken_at.isoformat() if s.taken_at else None,
+                "media_type": s.media_type,
+                "video_url": str(s.video_url) if s.video_url else None,
+                "thumbnail_url": str(s.thumbnail_url) if s.thumbnail_url else None
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/profile/highlights")
+def get_user_highlights(username: str):
+    try:
+        user_id = cl.user_id_from_username(username)
+        highlights = cl.user_highlights(user_id)
+        data = []
+        for h in highlights:
+            cover_url = None
+            if h.cover_media and getattr(h.cover_media, 'cropped_image_version', None):
+                cover_url = str(h.cover_media.cropped_image_version.url)
+            data.append({
+                "pk": h.pk,
+                "title": h.title,
+                "cover_url": cover_url
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/profile/posts")
+def get_user_posts(username: str, amount: int = 12):
+    try:
+        user_id = cl.user_id_from_username(username)
+        medias = cl.user_medias(user_id, amount=amount)
+        data = []
+        for m in medias:
+            data.append({
+                "pk": m.pk,
+                "code": m.code,
+                "media_type": m.media_type,
+                "like_count": m.like_count,
+                "comment_count": getattr(m, 'comment_count', 0),
+                "play_count": getattr(m, 'play_count', 0),
+                "taken_at": m.taken_at.isoformat() if m.taken_at else None,
+                "thumbnail_url": str(m.thumbnail_url) if m.thumbnail_url else None
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/profile/followers")
+def get_user_followers(username: str, amount: int = 20):
+    try:
+        user_id = cl.user_id_from_username(username)
+        # Using _v1 because the standard dict return structure is simpler to parse usually, 
+        # or we just iterate over the values of the dict. instagrapi user_followers returns dict{uid: UserShort}
+        followers = cl.user_followers(user_id, amount=amount)
+        data = []
+        for uid, u in followers.items():
+            data.append({
+                "pk": u.pk,
+                "username": u.username,
+                "full_name": u.full_name,
+                "profile_pic_url": str(u.profile_pic_url) if u.profile_pic_url else None,
+                "is_private": u.is_private
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/profile/following")
+def get_user_following(username: str, amount: int = 20):
+    try:
+        user_id = cl.user_id_from_username(username)
+        following = cl.user_following(user_id, amount=amount)
+        data = []
+        for uid, u in following.items():
+            data.append({
+                "pk": u.pk,
+                "username": u.username,
+                "full_name": u.full_name,
+                "profile_pic_url": str(u.profile_pic_url) if u.profile_pic_url else None,
+                "is_private": u.is_private
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/search/users")
+def search_users(query: str):
+    try:
+        users = cl.search_users(query)
+        data = []
+        for u in users:
+            data.append({
+                "pk": u.pk,
+                "username": u.username,
+                "full_name": u.full_name,
+                "profile_pic_url": str(u.profile_pic_url) if u.profile_pic_url else None,
+                "is_private": u.is_private,
+                "is_verified": u.is_verified
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/search/hashtag")
+def search_hashtag(name: str, amount: int = 10):
+    try:
+        medias = cl.hashtag_medias_top(name, amount=amount)
+        data = []
+        for m in medias:
+            data.append({
+                "pk": m.pk,
+                "code": m.code,
+                "media_type": m.media_type,
+                "like_count": m.like_count,
+                "taken_at": m.taken_at.isoformat() if m.taken_at else None
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

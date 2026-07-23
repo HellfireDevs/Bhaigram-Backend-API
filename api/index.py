@@ -190,16 +190,38 @@ def download_media(url: str):
         media_pk = cl.media_pk_from_url(url)
         media_info = cl.media_info(media_pk)
         
-        # Baki details jo tune maange the
+        # Bhaigram Extra Details
         response_data = {
             "media_id": media_info.pk,
+            "shortcode": getattr(media_info, 'code', ''),
             "media_type": media_info.media_type, # 1: Photo, 2: Video/Reel, 8: Carousel
             "author": media_info.user.username,
+            "taken_at": media_info.taken_at.isoformat() if media_info.taken_at else None,
             "caption": media_info.caption_text,
             "like_count": media_info.like_count,
             "comment_count": media_info.comment_count,
             "play_count": getattr(media_info, 'play_count', 0),
+            "video_duration": getattr(media_info, 'video_duration', 0.0),
         }
+        
+        # Location Info
+        if getattr(media_info, 'location', None):
+            response_data["location"] = {
+                "name": media_info.location.name,
+                "city": getattr(media_info.location, 'city', ''),
+                "lng": getattr(media_info.location, 'lng', None),
+                "lat": getattr(media_info.location, 'lat', None)
+            }
+            
+        # Music Info for Reels
+        clips_metadata = getattr(media_info, 'clips_metadata', {})
+        if clips_metadata and 'music_info' in clips_metadata and clips_metadata['music_info']:
+            music = clips_metadata['music_info'].get('music_asset_info', {})
+            response_data["music_info"] = {
+                "title": music.get('title', ''),
+                "artist": music.get('display_artist', ''),
+                "is_original": music.get('is_original_sound', False)
+            }
         
         # Download Links
         if media_info.media_type == 2: # Video/Reel
@@ -247,6 +269,10 @@ def profile_info(query: str):
             "media_count": user_info.media_count,
             "is_private": user_info.is_private,
             "is_verified": user_info.is_verified,
+            "is_business": getattr(user_info, "is_business", False),
+            "business_category": getattr(user_info, "business_category_name", ""),
+            "public_email": getattr(user_info, "public_email", ""),
+            "contact_phone_number": getattr(user_info, "contact_phone_number", ""),
             "profile_pic_url": str(user_info.profile_pic_url),
             "profile_pic_url_hd": str(user_info.profile_pic_url_hd)
         }

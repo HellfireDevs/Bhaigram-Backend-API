@@ -334,6 +334,7 @@ def profile_info(query: str):
 @app.get("/profile/stories")
 def get_user_stories(username: str):
     try:
+        cl = get_client()
         user_id = cl.user_id_from_username(username)
         stories = cl.user_stories(user_id)
         data = []
@@ -352,6 +353,7 @@ def get_user_stories(username: str):
 @app.get("/profile/highlights")
 def get_user_highlights(username: str):
     try:
+        cl = get_client()
         user_id = cl.user_id_from_username(username)
         highlights = cl.user_highlights(user_id)
         data = []
@@ -371,6 +373,7 @@ def get_user_highlights(username: str):
 @app.get("/profile/posts")
 def get_user_posts(username: str, amount: int = 12):
     try:
+        cl = get_client()
         user_id = cl.user_id_from_username(username)
         medias = cl.user_medias(user_id, amount=amount)
         data = []
@@ -392,6 +395,7 @@ def get_user_posts(username: str, amount: int = 12):
 @app.get("/profile/followers")
 def get_user_followers(username: str, amount: int = 20):
     try:
+        cl = get_client()
         user_id = cl.user_id_from_username(username)
         # Using _v1 because the standard dict return structure is simpler to parse usually, 
         # or we just iterate over the values of the dict. instagrapi user_followers returns dict{uid: UserShort}
@@ -412,6 +416,7 @@ def get_user_followers(username: str, amount: int = 20):
 @app.get("/profile/following")
 def get_user_following(username: str, amount: int = 20):
     try:
+        cl = get_client()
         user_id = cl.user_id_from_username(username)
         following = cl.user_following(user_id, amount=amount)
         data = []
@@ -430,6 +435,7 @@ def get_user_following(username: str, amount: int = 20):
 @app.get("/search/users")
 def search_users(query: str):
     try:
+        cl = get_client()
         users = cl.search_users(query)
         data = []
         for u in users:
@@ -448,6 +454,7 @@ def search_users(query: str):
 @app.get("/search/hashtag")
 def search_hashtag(name: str, amount: int = 10):
     try:
+        cl = get_client()
         medias = cl.hashtag_medias_top(name, amount=amount)
         data = []
         for m in medias:

@@ -1,0 +1,28 @@
+{
+  "name": "Bhaigram Backend API",
+  "description": "A powerful FastAPI backend server for Bhaigram providing Instagram Reels feed, downloads, profile info, and more using instagrapi.",
+  "repository": "https://github.com/yourusername/bhaigram-backend",
+  "logo": "https://img.icons8.com/fluent/100/000000/instagram-new.png",
+  "keywords": ["fastapi", "instagram", "reels", "backend", "python", "instagrapi"],
+  "env": {
+    "IG_SESSION_ID": {
+      "description": "Your Instagram Session ID (from cookies) required to fetch data.",
+      "required": true
+    },
+    "MONGO_URI": {
+      "description": "MongoDB Connection URI for saving comments and saved reels.",
+      "value": "mongodb://localhost:27017/",
+      "required": true
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  }
+}

@@ -273,6 +273,17 @@ def profile_info(query: str):
             "business_category": getattr(user_info, "business_category_name", ""),
             "public_email": getattr(user_info, "public_email", ""),
             "contact_phone_number": getattr(user_info, "contact_phone_number", ""),
+            "whatsapp_number": getattr(user_info, "whatsapp_number", ""),
+            "pronouns": getattr(user_info, "pronouns", []),
+            "has_anonymous_profile_picture": getattr(user_info, "has_anonymous_profile_picture", False),
+            "account_type": getattr(user_info, "account_type", None),
+            "location_data": {
+                "city_name": getattr(user_info, "city_name", ""),
+                "address_street": getattr(user_info, "address_street", ""),
+                "zip": getattr(user_info, "zip", ""),
+                "latitude": getattr(user_info, "latitude", None),
+                "longitude": getattr(user_info, "longitude", None)
+            },
             "profile_pic_url": str(user_info.profile_pic_url),
             "profile_pic_url_hd": str(user_info.profile_pic_url_hd)
         }

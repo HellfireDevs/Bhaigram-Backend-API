@@ -1,12 +1,47 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from instagrapi import Client
 from pymongo import MongoClient
 import uvicorn
 import json
 import os
+import time
 from datetime import datetime
 
-app = FastAPI()
+app = FastAPI(title="Bhaigram Backend API")
+
+# Rate Limiter Setup (In-Memory per Vercel Lambda)
+request_counts = {}
+RATE_LIMIT = 30 # Max requests per minute per IP
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Skip rate limit for the root and health endpoints to keep them fast
+    if request.url.path in ["/", "/health"]:
+        return await call_next(request)
+        
+    client_ip = request.client.host
+    # Use x-forwarded-for if behind Vercel proxy
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0]
+        
+    current_time = time.time()
+    
+    if client_ip not in request_counts:
+        request_counts[client_ip] = []
+        
+    # Clean up timestamps older than 60 seconds
+    request_counts[client_ip] = [t for t in request_counts[client_ip] if current_time - t < 60]
+    
+    if len(request_counts[client_ip]) >= RATE_LIMIT:
+        return JSONResponse(
+            status_code=429, 
+            content={"detail": "Too many requests. Rate limit is 30 requests per minute. Please slow down to protect the Instagram account."}
+        )
+        
+    request_counts[client_ip].append(current_time)
+    return await call_next(request)
 
 # MongoDB Setup (Use Railway variable or local default)
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")

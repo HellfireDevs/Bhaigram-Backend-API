@@ -80,6 +80,7 @@ def home():
             "profile_following": "/profile/following?username=...&amount=20",
             "search_users": "/search/users?query=...",
             "search_hashtag": "/search/hashtag?name=...&amount=10",
+            "search_music": "/search/music?query=...",
             "user_feed": "/feed/{telegram_id}",
             "user_saved_get": "/saved/{telegram_id}",
             "user_saved_add": "/saved/{telegram_id}/{reel_id}",
@@ -465,6 +466,26 @@ def search_hashtag(name: str, amount: int = 10):
                 "media_type": m.media_type,
                 "like_count": m.like_count,
                 "taken_at": m.taken_at.isoformat() if m.taken_at else None
+            })
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/search/music")
+def search_music(query: str):
+    try:
+        cl = get_client()
+        results = cl.search_music(query)
+        data = []
+        for r in results:
+            data.append({
+                "id": getattr(r, "id", getattr(r, "pk", "")),
+                "title": getattr(r, "title", ""),
+                "artist": getattr(r, "display_artist", ""),
+                "cover_url": str(getattr(r, "cover_artwork_uri", "")) if getattr(r, "cover_artwork_uri", None) else None,
+                "audio_url": str(getattr(r, "progressive_download_url", "")) if getattr(r, "progressive_download_url", None) else None,
+                "duration_ms": getattr(r, "duration_in_ms", 0),
+                "is_original": getattr(r, "is_original_sound", False)
             })
         return {"success": True, "data": data}
     except Exception as e:
